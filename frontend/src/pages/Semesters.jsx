@@ -1,0 +1,46 @@
+import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import API from '../services/api';
+import { useSelector } from 'react-redux';
+import { FiBook } from 'react-icons/fi';
+import PageHero from '../components/PageHero';
+
+export default function Semesters() {
+  const { collegeId, branchId } = useParams();
+  const { user } = useSelector((s) => s.auth);
+  const [semesters, setSemesters] = useState([]);
+  const [branch, setBranch] = useState(null);
+
+  const isOwnCollege = user?.college?._id === collegeId || user?.college === collegeId;
+
+  useEffect(() => {
+    API.get(`/semesters?branch=${branchId}`).then((r) => setSemesters(r.data)).catch(() => {});
+    API.get(`/branches/${branchId}`).then((r) => setBranch(r.data)).catch(() => {});
+  }, [branchId]);
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <PageHero
+        backLink={`/college/${collegeId}`}
+        backText="Back to Branches"
+        title={branch?.name || 'Select Semester'}
+        subtitle="Choose your semester"
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {semesters.map((s) => (
+          <Link key={s._id} to={`/college/${collegeId}/branch/${branchId}/semester/${s._id}/subjects`}
+            className="bg-zinc-800 rounded-xl shadow-md p-8 card-hover text-center border border-zinc-700">
+            <div className="w-16 h-16 bg-indigo-900/50 text-indigo-300 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <FiBook size={30} />
+            </div>
+            <h2 className="text-xl font-semibold text-white">{s.name}</h2>
+            <p className="text-sm text-zinc-500 mt-1">Year {s.year}</p>
+          </Link>
+        ))}
+      </div>
+      {semesters.length === 0 && (
+        <p className="text-center text-zinc-500 mt-8">No semesters found.</p>
+      )}
+    </div>
+  );
+}
