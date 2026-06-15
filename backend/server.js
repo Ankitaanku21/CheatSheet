@@ -9,6 +9,7 @@ const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 dotenv.config();
 connectDB();
+require('./config/cloudinary');
 
 const app = express();
 
@@ -26,8 +27,8 @@ app.use('/api/subjects', require('./routes/subjectRoutes'));
 app.use('/api/resources', require('./routes/resourceRoutes'));
 app.use('/api/quizzes', require('./routes/quizRoutes'));
 app.use('/api/semesters', require('./routes/semesterRoutes'));
-app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/upload/avatar', require('./routes/avatarRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/assistant', require('./routes/assistantRoutes'));
 
 app.use(notFound);
