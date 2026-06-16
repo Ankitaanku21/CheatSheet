@@ -7,6 +7,7 @@ export const viewResource = (id) => API.put(`/resources/${id}/view`);
 export const downloadResource = (id) => API.put(`/resources/${id}/download`);
 export const likeResource = (id) => API.put(`/resources/${id}/like`);
 export const commentOnResource = (id, comment) => API.post(`/resources/${id}/comment`, { comment });
+export const updateResource = (id, data) => API.put(`/resources/${id}`, data);
 export const deleteResource = (id) => API.delete(`/resources/${id}`);
 export const saveResource = (id) => API.put(`/resources/${id}/save`);
 export const uploadFile = (formData) => API.post('/upload', formData);

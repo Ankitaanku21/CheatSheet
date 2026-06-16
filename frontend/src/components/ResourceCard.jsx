@@ -1,11 +1,13 @@
-import { FiDownload, FiEye, FiThumbsUp, FiBookmark } from 'react-icons/fi';
-import { likeResource, downloadResource as download, saveResource } from '../services/resourceService';
+import { FiDownload, FiEye, FiThumbsUp, FiBookmark, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { likeResource, downloadResource as download, saveResource, deleteResource as remove } from '../services/resourceService';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-export default function ResourceCard({ resource, onUpdate }) {
+export default function ResourceCard({ resource, onUpdate, onEdit }) {
   const { user } = useSelector((s) => s.auth);
+  const isOwner = user?._id === resource.uploadedBy?._id;
+  const isAdmin = user?.role === 'admin';
   const liked = user && resource.likes?.includes(user._id);
   const saved = user && user.savedResources?.includes(resource._id);
 
@@ -19,7 +21,7 @@ export default function ResourceCard({ resource, onUpdate }) {
 
   const handleLike = async () => {
     try {
-      const res = await likeResource(resource._id);
+      await likeResource(resource._id);
       onUpdate?.();
     } catch { toast.error('Failed'); }
   };
@@ -30,6 +32,15 @@ export default function ResourceCard({ resource, onUpdate }) {
       onUpdate?.();
       toast.success(saved ? 'Removed' : 'Saved');
     } catch { toast.error('Failed'); }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete "${resource.title}"? This cannot be undone.`)) return;
+    try {
+      await remove(resource._id);
+      toast.success('Resource deleted');
+      onUpdate?.();
+    } catch (err) { toast.error(err.response?.data?.message || 'Delete failed'); }
   };
 
   return (
@@ -61,12 +72,25 @@ export default function ResourceCard({ resource, onUpdate }) {
         <button onClick={handleDownload} className="p-2 rounded-lg hover:bg-zinc-700 text-zinc-400">
           <FiDownload size={16} />
         </button>
-        <button onClick={handleLike} className={`p-2 rounded-lg hover:bg-zinc-700 ${liked ? 'text-indigo-400' : 'text-zinc-400'}`}>
-          <FiThumbsUp size={16} />
-        </button>
-        <button onClick={handleSave} className={`p-2 rounded-lg hover:bg-zinc-700 ${saved ? 'text-indigo-400' : 'text-zinc-400'}`}>
-          <FiBookmark size={16} />
-        </button>
+        {isOwner || isAdmin ? (
+          <>
+            <button onClick={() => onEdit?.(resource)} className="p-2 rounded-lg hover:bg-zinc-700 text-zinc-400">
+              <FiEdit2 size={16} />
+            </button>
+            <button onClick={handleDelete} className="p-2 rounded-lg hover:bg-zinc-700 text-red-400">
+              <FiTrash2 size={16} />
+            </button>
+          </>
+        ) : (
+          <>
+            <button onClick={handleLike} className={`p-2 rounded-lg hover:bg-zinc-700 ${liked ? 'text-indigo-400' : 'text-zinc-400'}`}>
+              <FiThumbsUp size={16} />
+            </button>
+            <button onClick={handleSave} className={`p-2 rounded-lg hover:bg-zinc-700 ${saved ? 'text-indigo-400' : 'text-zinc-400'}`}>
+              <FiBookmark size={16} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

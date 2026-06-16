@@ -3,6 +3,7 @@ import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import API from '../services/api';
 import ResourceCard from '../components/ResourceCard';
+import EditResourceModal from '../components/EditResourceModal';
 import QuizCard from '../components/QuizCard';
 import { FiUpload, FiSearch, FiX, FiFile } from 'react-icons/fi';
 import PageHero from '../components/PageHero';
@@ -22,11 +23,16 @@ export default function Resources() {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
   const [questionCounts, setQuestionCounts] = useState({});
+  const [editingResource, setEditingResource] = useState(null);
 
-  useEffect(() => {
+  const fetchResources = () => {
     const params = { subject: subjectId, type };
     if (search) params.search = search;
     API.get('/resources', { params }).then((r) => setResources(r.data)).catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchResources();
     API.get(`/subjects/${subjectId}`).then((r) => setSubject(r.data)).catch(() => {});
   }, [subjectId, type, search]);
 
@@ -66,9 +72,7 @@ export default function Resources() {
       setShowUpload(false);
       setUploadForm({ title: '', file: null });
       if (fileRef.current) fileRef.current.value = '';
-      const params = { subject: subjectId, type };
-      const res = await API.get('/resources', { params });
-      setResources(res.data);
+      fetchResources();
     } catch (err) {
       console.error('[Upload] FAILED:', err);
       const msg = err.response?.data?.message || err.message || 'Upload failed';
@@ -135,6 +139,14 @@ export default function Resources() {
         </div>
       )}
 
+      {editingResource && (
+        <EditResourceModal
+          resource={editingResource}
+          onClose={() => setEditingResource(null)}
+          onSaved={fetchResources}
+        />
+      )}
+
       {resources.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-zinc-300 mb-4">Quizzes</h2>
@@ -149,10 +161,12 @@ export default function Resources() {
       <h2 className="text-lg font-semibold text-zinc-300 mb-4">{type === 'notes' ? 'Notes' : 'PYQs'}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {resources.map((r) => (
-          <ResourceCard key={r._id} resource={r} onUpdate={() => {
-            const params = { subject: subjectId, type };
-            API.get('/resources', { params }).then((res) => setResources(res.data));
-          }} />
+          <ResourceCard
+            key={r._id}
+            resource={r}
+            onUpdate={fetchResources}
+            onEdit={setEditingResource}
+          />
         ))}
       </div>
       {resources.length === 0 && (

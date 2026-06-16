@@ -88,6 +88,31 @@ const likeResource = async (req, res) => {
   }
 };
 
+const updateResource = async (req, res) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+    const isOwner = resource.uploadedBy.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!isOwner && !isAdmin) return res.status(403).json({ message: 'Not authorized' });
+
+    const { title, type, fileUrl, fileSize } = req.body;
+    if (title !== undefined) resource.title = title;
+    if (type !== undefined) resource.type = type;
+    if (fileUrl !== undefined) resource.fileUrl = fileUrl;
+    if (fileSize !== undefined) resource.fileSize = fileSize;
+
+    await resource.save();
+    const updated = await Resource.findById(resource._id)
+      .populate('uploadedBy', 'name avatar')
+      .populate('subject', 'name');
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const deleteResource = async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
@@ -132,5 +157,5 @@ const saveResource = async (req, res) => {
 module.exports = {
   getResources, getResourceById, createResource,
   viewResource, downloadResource, likeResource,
-  deleteResource, saveResource, getBookmarks
+  updateResource, deleteResource, saveResource, getBookmarks
 };

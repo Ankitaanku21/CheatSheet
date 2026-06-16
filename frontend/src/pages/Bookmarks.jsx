@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../services/api';
 import ResourceCard from '../components/ResourceCard';
+import EditResourceModal from '../components/EditResourceModal';
 import PageHero from '../components/PageHero';
 
 export default function Bookmarks() {
   const [resources, setResources] = useState([]);
+  const [editingResource, setEditingResource] = useState(null);
 
   const fetchBookmarks = async () => {
     try {
@@ -24,12 +26,26 @@ export default function Bookmarks() {
           backText="Back to Home"
           title="Saved Resources"
         />
+
+        {editingResource && (
+          <EditResourceModal
+            resource={editingResource}
+            onClose={() => setEditingResource(null)}
+            onSaved={fetchBookmarks}
+          />
+        )}
+
         {resources.length === 0 ? (
           <p className="text-zinc-400 text-center mt-20">No saved resources yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {resources.map(r => (
-              <ResourceCard key={r._id} resource={r} onUpdate={fetchBookmarks} />
+              <ResourceCard
+                key={r._id}
+                resource={r}
+                onUpdate={fetchBookmarks}
+                onEdit={setEditingResource}
+              />
             ))}
           </div>
         )}
