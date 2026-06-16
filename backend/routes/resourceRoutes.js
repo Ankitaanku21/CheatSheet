@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.get('/', getResources);
 router.get('/user/bookmarks', protect, getBookmarks);
-router.get('/:id/file', protect, streamResourceFile);
+router.get('/:id/file', streamResourceFile);
 router.get('/:id', getResourceById);
 router.post('/', protect, createResource);
 router.put('/:id/view', protect, viewResource);
