@@ -30,8 +30,9 @@ export default function Preview() {
 
   const handleDownload = async () => {
     try {
-      const res = await downloadResource(resourceId);
-      window.open(res.data.fileUrl, '_blank');
+      await downloadResource(resourceId);
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      window.open(`${apiBase}/api/resources/${resourceId}/file?download=1`, '_blank');
       toast.success('Download started');
     } catch {
       toast.error('Download failed');
@@ -49,9 +50,7 @@ export default function Preview() {
   if (!resource) return null;
 
   const apiBase = import.meta.env.VITE_API_URL || '';
-  const pdfUrl = resource.fileUrl?.startsWith('http')
-    ? resource.fileUrl
-    : `${apiBase}${resource.fileUrl}`;
+  const pdfUrl = `${apiBase}/api/resources/${resourceId}/file`;
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">

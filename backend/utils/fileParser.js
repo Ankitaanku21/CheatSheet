@@ -2,6 +2,7 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { getAuthenticatedUrl } = require('./cloudinaryHelper');
 
 const parsePDF = async (buffer) => {
   const { PDFParse } = require('pdf-parse');
@@ -46,9 +47,12 @@ const parseDOCX = async (buffer) => {
 };
 
 const downloadFile = (url) => {
+  const finalUrl = url.startsWith('https://res.cloudinary.com/') && url.includes('/upload/')
+    ? getAuthenticatedUrl(url)
+    : url;
   return new Promise((resolve, reject) => {
-    const client = url.startsWith('https') ? https : http;
-    client.get(url, (response) => {
+    const client = finalUrl.startsWith('https') ? https : http;
+    client.get(finalUrl, (response) => {
       const chunks = [];
       response.on('data', (chunk) => chunks.push(chunk));
       response.on('end', () => resolve(Buffer.concat(chunks)));

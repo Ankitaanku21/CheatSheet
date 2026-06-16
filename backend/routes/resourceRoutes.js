@@ -2,13 +2,15 @@ const express = require('express');
 const {
   getResources, getResourceById, createResource,
   viewResource, downloadResource, likeResource,
-  updateResource, deleteResource, saveResource, getBookmarks
+  updateResource, deleteResource, saveResource, getBookmarks,
+  streamResourceFile
 } = require('../controllers/resourceController');
 const { protect } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/', getResources);
 router.get('/user/bookmarks', protect, getBookmarks);
+router.get('/:id/file', protect, streamResourceFile);
 router.get('/:id', getResourceById);
 router.post('/', protect, createResource);
 router.put('/:id/view', protect, viewResource);

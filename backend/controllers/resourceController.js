@@ -1,4 +1,24 @@
 const Resource = require('../models/Resource');
+const { getAuthenticatedUrl } = require('../utils/cloudinaryHelper');
+
+const streamResourceFile = async (req, res) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+    if (!resource.fileUrl.startsWith('https://res.cloudinary.com/')) {
+      return res.redirect(resource.fileUrl);
+    }
+
+    const downloadUrl = getAuthenticatedUrl(resource.fileUrl, {
+      attachment: req.query.download === '1',
+    });
+
+    res.redirect(downloadUrl);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 const getResources = async (req, res) => {
   try {
@@ -157,5 +177,6 @@ const saveResource = async (req, res) => {
 module.exports = {
   getResources, getResourceById, createResource,
   viewResource, downloadResource, likeResource,
-  updateResource, deleteResource, saveResource, getBookmarks
+  updateResource, deleteResource, saveResource, getBookmarks,
+  streamResourceFile
 };

@@ -13,8 +13,9 @@ export default function ResourceCard({ resource, onUpdate, onEdit }) {
 
   const handleDownload = async () => {
     try {
-      const res = await download(resource._id);
-      window.open(res.data.fileUrl, '_blank');
+      await download(resource._id);
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      window.open(`${apiBase}/api/resources/${resource._id}/file?download=1`, '_blank');
       toast.success('Download started');
     } catch (err) { toast.error(err.response?.data?.message || 'Download failed'); }
   };
