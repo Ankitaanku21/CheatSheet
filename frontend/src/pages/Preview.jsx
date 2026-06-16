@@ -102,6 +102,3 @@ export default function Preview() {
     </div>
   );
 }
-
-console.log("BASE URL:", base);
-console.log("PDF URL:", pdfUrl);
