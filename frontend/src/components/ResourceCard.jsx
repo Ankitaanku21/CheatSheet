@@ -1,5 +1,6 @@
 import { FiDownload, FiEye, FiThumbsUp, FiBookmark, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { likeResource, downloadResource as download, saveResource, deleteResource as remove } from '../services/resourceService';
+import API from '../services/api';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -14,8 +15,8 @@ export default function ResourceCard({ resource, onUpdate, onEdit }) {
   const handleDownload = async () => {
     try {
       await download(resource._id);
-      const apiBase = import.meta.env.VITE_API_URL || '';
-      window.open(`${apiBase}/api/resources/${resource._id}/file?download=1`, '_blank');
+      const base = API.defaults.baseURL;
+      window.open(`${base}/resources/${resource._id}/file?download=1`, '_blank');
       toast.success('Download started');
     } catch (err) { toast.error(err.response?.data?.message || 'Download failed'); }
   };
