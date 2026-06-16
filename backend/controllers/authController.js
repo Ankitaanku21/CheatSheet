@@ -23,7 +23,7 @@ const registerUser = async (req, res) => {
     }
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const user = await User.create({ name, email, password, college: collegeId, verificationToken });
-    const baseUrl = process.env.VERIFICATION_URL || 'http://localhost:5173';
+    const baseUrl = (process.env.VERIFICATION_URL || 'http://localhost:5173').replace(/\/$/, '');
     const verifyLink = `${baseUrl}/verify/${verificationToken}`;
     await sendEmail({
       to: user.email,
